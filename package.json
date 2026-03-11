@@ -1,0 +1,16 @@
+{
+  "name": "capstone_amazon_arabinda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.4.0",
+    "typescript": "^5.9.3"
+  }
+}
