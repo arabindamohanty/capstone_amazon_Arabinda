@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { HomePage } from './pages/HomePage';
-import { SearchPage } from './pages/SearchPage';
-import { ProductDetailsPage } from './pages/ProductDetailsPage';
+import { HomePage } from '../pages/HomePage';
+import { SearchPage } from '../pages/SearchPage';
+import { ProductDetailsPage } from '../pages/ProductDetailsPage';
 
 // Constants
 const URL = 'https://www.amazon.in/';
