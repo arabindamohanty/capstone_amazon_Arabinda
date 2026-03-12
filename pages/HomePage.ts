@@ -1,5 +1,7 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import fs from 'fs';
+import path from 'path';
 
 export class HomePage extends BasePage {
   readonly mobilesLink: Locator;
@@ -7,6 +9,11 @@ export class HomePage extends BasePage {
   readonly dellBrandLink: Locator;
   readonly pagetitle: Locator;
   readonly menuItems: Locator;
+  readonly searchBoxInput: Locator;
+  readonly goButton: Locator;
+  readonly resultsHeading: Locator;
+  readonly productName: Locator;
+
 
   constructor(page: Page) {
     super(page);
@@ -15,6 +22,10 @@ export class HomePage extends BasePage {
     this.dellBrandLink = page.getByRole('link', { name: 'Dell', exact: true });
     this.pagetitle = page.locator('[aria-label="Amazon.in"]');
     this.menuItems = page.locator('[class="nav-a-content"]');
+     this.searchBoxInput = page.getByRole('searchbox', { name: 'Search Amazon.in' });
+    this.goButton = page.getByRole('button', { name: 'Go', exact: true });
+    this.resultsHeading = page.getByRole('heading', { name: 'Results', exact: true });
+    this.productName = page.locator('//div[@data-cy="title-recipe"]/a');
   }
 
   async navigateToAmazon(url: string) {
@@ -25,6 +36,7 @@ export class HomePage extends BasePage {
 
   async hoverAndClickMobiles() {
     await this.mobilesLink.hover();
+    await this.page.waitForTimeout(2000);
     await this.mobilesLink.click();
     console.log('Hovered and clicked on Mobiles link');
   }
@@ -45,8 +57,28 @@ export class HomePage extends BasePage {
     return cleanedItems;
   }
 
+  async captureScreenshot(filename: string) {
+    // Wait for page to be stable before taking screenshot
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForTimeout(2000);
+    await this.page.screenshot({ path: filename });
+    console.log(`Captured screenshot: ${filename}`);
+  }
+
+  async compareScreenshots(expectedPath: string, actualPath: string) {
+    const expectedImage = fs.readFileSync(path.resolve(expectedPath));
+    const actualImage = fs.readFileSync(path.resolve(actualPath));
+
+    if (expectedImage.equals(actualImage)) {
+      console.log('Screenshots match.');
+    } else {
+      console.log('Screenshots do not match.');
+    }
+  }
+
   async hoverLaptopsAccessories() {
     await this.laptopsAccessoriesLink.hover();
+    await this.page.waitForTimeout(2000);
     await this.page.getByText('Dell').waitFor();
     console.log('Hovered on Laptops & Accessories link');
   }
@@ -54,5 +86,29 @@ export class HomePage extends BasePage {
   async clickDellBrand() {
     await this.dellBrandLink.click();
     console.log('Clicked on Dell brand link');
+  }
+
+   async clickSearchBox() {
+    await this.searchBoxInput.click();
+    console.log('Clicked on search box');
+  }
+
+  async enterSearchQuery(query: string) {
+    await this.searchBoxInput.fill(query);
+    console.log(`Entered ${query} in the search box`);
+  }
+
+  async clickGoButton() {
+    await this.goButton.click();
+    console.log('Clicked on Go button');
+  }
+
+  async isResultsHeadingVisible() {
+    const isVisible = await this.resultsHeading.isVisible();
+  }
+
+  async clickProductLink() {
+    await this.productName.nth(0).click();
+    console.log('Clicked on the first product link');
   }
 }
