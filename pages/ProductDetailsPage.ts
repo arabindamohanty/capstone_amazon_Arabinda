@@ -1,45 +1,57 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator , expect} from '@playwright/test';
 import { BasePage } from './BasePage';
 
 export class ProductDetailsPage extends BasePage {
   readonly addToCartButton: Locator;
-  readonly quantityText: Locator;
   readonly topReviewsHeading: Locator;
-  readonly reviewsMedleySection: Locator;
+  readonly quantityDropdown: Locator;
+  readonly reviews: Locator;
+  readonly addedToCartMessage: Locator;
 
   constructor(page: Page) {
     super(page);
     this.addToCartButton = page.getByRole('button', { name: 'Add to cart' });
-    this.quantityText = page.getByText('Quantity:1');
     this.topReviewsHeading = page.getByRole('heading', { name: 'Top reviews from India' });
-    this.reviewsMedleySection = page.locator('#reviewsMedley');
+    this.quantityDropdown = page.locator('select[name="quantity"]');
+    this.reviews = page.locator('#customerReviews .review-text-content');
+    this.addedToCartMessage = page.getByText('Added to Cart');
   }
 
   async isAddToCartButtonVisible() {
-    return this.addToCartButton.isVisible();
-  }
-
-  async isQuantityTextVisible() {
-    return this.quantityText.isVisible();
-  }
-
-  async navigateToProductUrl(url: string) {
-    await this.navigateTo(url);
+  await expect(this.addToCartButton).toBeVisible();
+  console.log('Add to Cart button is visible');
   }
 
   async isTopReviewsHeadingVisible() {
-    return this.topReviewsHeading.isVisible();
+    await expect(this.topReviewsHeading).toBeVisible();
+    console.log('Top reviews from India section is visible');
+  }
+  async isQuantityDropdownVisible() {
+    await expect(this.quantityDropdown).toBeVisible();
+    console.log('Quantity dropdown is visible');
+
   }
 
-  async isReviewsMedleyVisible() {
-    return this.reviewsMedleySection.isVisible();
+  async isquantitySetToOne() {
+  await expect(this.quantityDropdown).toHaveValue('1');
+  console.log('Quantity is set to 1 by default');
   }
 
-  async verifyReviewsContainText(expectedText: string) {
-    return this.reviewsMedleySection.isVisible();
-  }
+  async saveReviewsToFile() {
+    const reviews = await this.reviews.allTextContents();
+    const fs = require('fs');
+    fs.writeFileSync('reviews.txt', reviews.join('\n\n'));
+    console.log('Saved reviews to reviews.txt');
+}
 
-  getReviewsMedleyLocator() {
-    return this.reviewsMedleySection;
-  }
+async addToCart() {
+  await this.addToCartButton.waitFor();
+  await this.addToCartButton.click();
+  console.log('Clicked on Add to Cart button'); 
+}
+
+async verifyProductAddedToCart() {
+   await expect(this.addedToCartMessage).toBeVisible();
+   console.log('Product is added to cart message is visible');
+}
 }

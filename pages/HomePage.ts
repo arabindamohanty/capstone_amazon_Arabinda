@@ -107,8 +107,13 @@ export class HomePage extends BasePage {
     const isVisible = await this.resultsHeading.isVisible();
   }
 
-  async clickProductLink() {
+  async getProductName() {
+    await this.productName.nth(0).waitFor();
+    const name = await this.productName.nth(0).textContent();
+    console.log('First product name:', name);
+  }
+
+  async clickFirstProduct() {
     await this.productName.nth(0).click();
-    console.log('Clicked on the first product link');
   }
 }

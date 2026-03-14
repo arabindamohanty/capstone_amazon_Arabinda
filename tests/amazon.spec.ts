@@ -3,9 +3,10 @@ import { HomePage } from '../pages/HomePage';
 import { ProductDetailsPage } from '../pages/ProductDetailsPage';
 
 // Constants
-const URL = 'https://www.amazon.in/';
-const PRODUCT_SEARCH = 'Gaming Laptop';
-const EXPECTED_REVIEW_TEXT = 'View Image Gallery Amazon Customer 5.0 out of 5 stars';
+const amazonUrl = 'https://www.amazon.in/';
+const productSearchText = 'Gaming Laptop';
+const actualScreenshotPath = 'Screenshot/home_page.png';
+const expectedScreenshotPath = 'Screenshot/savedscreenshot.png';
 
 test('Amazon Laptop Add to Cart', async ({ browser }) => {
 
@@ -14,39 +15,61 @@ test('Amazon Laptop Add to Cart', async ({ browser }) => {
 
   // Initialize Home Page
   const homePage = new HomePage(page);
-  await homePage.navigateToAmazon(URL);
+
+  // Navigate to Amazon link
+  await homePage.navigateToAmazon(amazonUrl);
+
+  // Hover and click on Mobiles link
   await homePage.hoverAndClickMobiles();
+  
+  // Read the menu items and print the total number of menu items and the menu items
   await homePage.getMenuItems();
-  await homePage.captureScreenshot('Screenshot/home_page.png');
-  await homePage.compareScreenshots('Screenshot/savedscreenshot.png', 'Screenshot/home_page.png');
+
+  // Capture screenshot of the home page and compare with the saved screenshot
+  await homePage.captureScreenshot(actualScreenshotPath);
+  await homePage.compareScreenshots(expectedScreenshotPath, actualScreenshotPath);
+  
+  // Hover and click on Laptops & Accessories link and then click on Dell link
   await homePage.hoverLaptopsAccessories();
   await homePage.clickDellBrand();
 
-  // Search for product
+  // Search for Gaming Laptop in the search box
   await homePage.clickSearchBox();
-  await homePage.enterSearchQuery(PRODUCT_SEARCH);
+  await homePage.enterSearchQuery(productSearchText);
   await homePage.clickGoButton();
   
   // Verify results are visible
   await expect(homePage.resultsHeading).toBeVisible();
 
-  // Handle new product page
-  const [newPage] = await Promise.all(
-  [context.waitForEvent('page'), homePage.clickProductLink()]
-  );
+  // Get the name of the first product in the search results
+  await homePage.getProductName();
 
+  // Click on the first product in the search results
+  const [newPage] = await Promise.all(
+  [context.waitForEvent('page'), homePage.clickFirstProduct()]
+  );
 
   // Initialize Product Details Page
   const productDetailsPage = new ProductDetailsPage(newPage);
-  await expect(productDetailsPage.addToCartButton).toBeVisible();
-  await expect(productDetailsPage.quantityText).toBeVisible();
+  
+  // Verify Add to Cart button is visible
+  await productDetailsPage.isAddToCartButtonVisible();
 
-  // Navigate directly to product URL
- 
-
+  // Verify quantity should be 1 from the dropdown
+  await productDetailsPage.isQuantityDropdownVisible();
+  await productDetailsPage.isquantitySetToOne();
+  
   // Verify reviews section
-  await expect(productDetailsPage.topReviewsHeading).toBeVisible();
-  await expect(productDetailsPage.reviewsMedleySection).toContainText(EXPECTED_REVIEW_TEXT);
+  await productDetailsPage.isTopReviewsHeadingVisible();
+  
+  // Get the reviews under review section and store in an text file
+  await productDetailsPage.saveReviewsToFile();
+  
+  // Add to cart
+  await productDetailsPage.addToCart();
+
+  // verify product is added to cart message is visible
+  await productDetailsPage.verifyProductAddedToCart();
 
   // Close the browser
   await browser.close();
