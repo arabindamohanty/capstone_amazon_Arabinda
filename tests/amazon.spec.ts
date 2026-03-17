@@ -5,8 +5,9 @@ import { ProductDetailsPage } from '../pages/ProductDetailsPage';
 // Constants
 const amazonUrl = 'https://www.amazon.in/';
 const productSearchText = 'Gaming Laptop';
-const actualScreenshotPath = 'Screenshot/home_page.png';
-const expectedScreenshotPath = 'Screenshot/savedscreenshot.png';
+const homePageScreenshotPath = 'Screenshot/home_page.png';
+const productDetailsScreenshotPath = 'Screenshot/product_details.png';
+const productDetailsScreenshot = 'product_details.png';
 
 test('Amazon Laptop Add to Cart', async ({ browser }) => {
 
@@ -19,15 +20,14 @@ test('Amazon Laptop Add to Cart', async ({ browser }) => {
   // Navigate to Amazon link
   await homePage.navigateToAmazon(amazonUrl);
 
+  // Capture screenshot of the home page
+  await homePage.captureScreenshot(homePageScreenshotPath);
+
   // Hover and click on Mobiles link
   await homePage.hoverAndClickMobiles();
   
   // Read the menu items and print the total number of menu items and the menu items
   await homePage.getMenuItems();
-
-  // Capture screenshot of the home page and compare with the saved screenshot
-  await homePage.captureScreenshot(actualScreenshotPath);
-  await homePage.compareScreenshots(expectedScreenshotPath, actualScreenshotPath);
   
   // Hover and click on Laptops & Accessories link and then click on Dell link
   await homePage.hoverLaptopsAccessories();
@@ -46,18 +46,28 @@ test('Amazon Laptop Add to Cart', async ({ browser }) => {
 
   // Click on the first product in the search results
   const [newPage] = await Promise.all(
-  [context.waitForEvent('page'), homePage.clickFirstProduct()]
+  [context.waitForEvent('page'), homePage.clickFirstDellProduct()]
   );
 
   // Initialize Product Details Page
   const productDetailsPage = new ProductDetailsPage(newPage);
   
+  // Wait for page to load
+  await newPage.waitForLoadState('domcontentloaded');
+  await newPage.waitForTimeout(3000);
+  
   // Verify Add to Cart button is visible
   await productDetailsPage.isAddToCartButtonVisible();
 
   // Verify quantity should be 1 from the dropdown
-  await productDetailsPage.isQuantityDropdownVisible();
-  await productDetailsPage.isquantitySetToOne();
+  
+   await productDetailsPage.isQuantityDropdownVisible();
+   await productDetailsPage.isquantitySetToOne();
+
+  // Capture screenshot of the product details page and compare with the saved snapshot
+  await productDetailsPage.captureScreenshot(productDetailsScreenshotPath);
+  await productDetailsPage.compareScreenshots(productDetailsScreenshot);
+
   
   // Verify reviews section
   await productDetailsPage.isTopReviewsHeadingVisible();

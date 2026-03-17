@@ -18,6 +18,7 @@ export class ProductDetailsPage extends BasePage {
   }
 
   async isAddToCartButtonVisible() {
+    await this.addToCartButton.waitFor();
   await expect(this.addToCartButton).toBeVisible();
   console.log('Add to Cart button is visible');
   }
@@ -27,14 +28,15 @@ export class ProductDetailsPage extends BasePage {
     console.log('Top reviews from India section is visible');
   }
   async isQuantityDropdownVisible() {
+     await this.quantityDropdown.waitFor();
     await expect(this.quantityDropdown).toBeVisible();
     console.log('Quantity dropdown is visible');
-
   }
 
   async isquantitySetToOne() {
-  await expect(this.quantityDropdown).toHaveValue('1');
-  console.log('Quantity is set to 1 by default');
+    await this.quantityDropdown.waitFor();
+    await expect(this.quantityDropdown).toHaveValue('1');
+    console.log('Quantity is set to 1 by default');
   }
 
   async saveReviewsToFile() {
@@ -51,7 +53,19 @@ async addToCart() {
 }
 
 async verifyProductAddedToCart() {
+  await this.addedToCartMessage.waitFor();
    await expect(this.addedToCartMessage).toBeVisible();
-   console.log('Product is added to cart message is visible');
+   console.log('Aded to cart message is visible');
 }
+
+async captureScreenshot(filename: string) {
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.screenshot({ path: filename });
+    console.log(`Captured screenshot: ${filename}`);
+  }
+
+  async compareScreenshots(snapshotName: string) {
+    expect(await this.page.screenshot()).toMatchSnapshot(snapshotName, { maxDiffPixels: 2000 });
+    console.log('Screenshots matched');
+  }
 }

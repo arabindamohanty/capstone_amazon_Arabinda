@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
 import fs from 'fs';
 import path from 'path';
@@ -44,8 +44,6 @@ export class HomePage extends BasePage {
   async getMenuItems() {
     await this.menuItems.nth(0).waitFor();
     const items = await this.menuItems.allTextContents();
-    
-    // Clean items by removing whitespace and newlines
     const cleanedItems = items
       .map(item => item.trim().replace(/\n/g, ''))
       .filter(item => item.length > 0);
@@ -60,20 +58,14 @@ export class HomePage extends BasePage {
   async captureScreenshot(filename: string) {
     // Wait for page to be stable before taking screenshot
     await this.page.waitForLoadState('domcontentloaded');
-    await this.page.waitForTimeout(2000);
+    await this.page.waitForTimeout(3000);
     await this.page.screenshot({ path: filename });
     console.log(`Captured screenshot: ${filename}`);
   }
 
-  async compareScreenshots(expectedPath: string, actualPath: string) {
-    const expectedImage = fs.readFileSync(path.resolve(expectedPath));
-    const actualImage = fs.readFileSync(path.resolve(actualPath));
-
-    if (expectedImage.equals(actualImage)) {
-      console.log('Screenshots match.');
-    } else {
-      console.log('Screenshots do not match.');
-    }
+  async compareScreenshots(savedSnapshot: string, newSnapshotName: string) {
+    await expect(savedSnapshot).toMatchSnapshot(newSnapshotName);
+    console.log(`Screenshots match: ${newSnapshotName}`);
   }
 
   async hoverLaptopsAccessories() {
@@ -115,5 +107,16 @@ export class HomePage extends BasePage {
 
   async clickFirstProduct() {
     await this.productName.nth(0).click();
+  }
+
+  //get all product names and click on the first product which contains dell in the name
+  async clickFirstDellProduct() {
+    const productNames = await this.productName.allTextContents();
+    for (let i = 0; i < productNames.length; i++) {
+      if (productNames[i].toLowerCase().includes('dell')) {
+        await this.productName.nth(i).click();
+        break;
+      }
+    }
   }
 }
